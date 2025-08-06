@@ -4,6 +4,7 @@ const pool = require('./database_connection');
 const updateHoldings = require('./services/update_holdings');
 const holdingsRoute = require('./routes/holdings');
 const cors = require('cors');
+const stockRoutes = require('./routes/stocks');
 
 
 const app = express();
@@ -21,6 +22,6 @@ app.post('/update', async (req, res) => {
   const result = await updateHoldings();
   res.json(result);
 });
-
+app.use('/api', stockRoutes);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

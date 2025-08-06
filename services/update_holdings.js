@@ -1,6 +1,7 @@
 const pool = require('../database_connection');
 const axios = require('axios');
 require('dotenv').config();
+const cron = require('node-cron');
 
 const updateHoldings = async () => {
   console.log("Update function triggered");
@@ -43,5 +44,10 @@ try {
   console.log("Updates complete:", updates);
   return updates;
 };
+
+cron.schedule('*/5 * * * *', async () => {
+  console.log('🔄 Updating holdings...');
+  await updateHoldings(); // Make sure this updates current_price & return_value
+});
 
 module.exports = updateHoldings;
