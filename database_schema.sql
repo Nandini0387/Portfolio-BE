@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS holdings (
     buy_price DECIMAL(10, 2) NOT NULL,
     current_price DECIMAL(10, 2),
     return_value DECIMAL(10, 2),
+    threshold DECIMAL(10, 2) DEFAULT NULL,
     last_updated DATETIME
 );
