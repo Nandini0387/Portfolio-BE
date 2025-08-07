@@ -14,3 +14,11 @@ CREATE TABLE IF NOT EXISTS holdings (
     threshold DECIMAL(10, 2) DEFAULT NULL,
     last_updated DATETIME
 );
+
+
+-- Create portfolio history table
+CREATE TABLE IF NOT EXISTS portfolio_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    total_value DECIMAL(15, 2) NOT NULL,
+    timestamp DATETIME NOT NULL
+);
