@@ -70,4 +70,118 @@ router.delete('/remove-stock/:symbol', async (req, res) => {
   });
   
 
+  /*
+router.get('/top-performers', async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT symbol, return_value 
+         FROM holdings 
+         WHERE return_value IS NOT NULL 
+         ORDER BY return_value DESC 
+         LIMIT 3`
+      );
+  
+      res.status(200).json(rows);
+    } catch (error) {
+      console.error('Error fetching top performers:', error.message);
+      res.status(500).json({ error: 'Failed to fetch top performers' });
+    }
+  });
+  
+  router.get('/least-performers', async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT symbol, return_value 
+         FROM holdings 
+         WHERE return_value IS NOT NULL 
+         ORDER BY return_value ASC 
+         LIMIT 3`
+      );
+  
+      res.status(200).json(rows);
+    } catch (error) {
+      console.error('Error fetching least performers:', error.message);
+      res.status(500).json({ error: 'Failed to fetch least performers' });
+    }
+  });
+  
+*/
+
+  // Add these to your routes/stocks.js or create a new route file
+
+// Get top performers
+router.get('/top-performers', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT symbol, company_name, return_value, 
+             (return_value / (buy_price * quantity) * 100) as return_percentage
+      FROM holdings 
+      WHERE return_value IS NOT NULL 
+      ORDER BY return_percentage DESC 
+      LIMIT 3
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching top performers:', error);
+    res.status(500).json({ error: 'Failed to fetch top performers' });
+  }
+});
+
+// Get worst performers
+router.get('/worst-performers', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT symbol, company_name, return_value,
+             (return_value / (buy_price * quantity) * 100) as return_percentage
+      FROM holdings 
+      WHERE return_value IS NOT NULL 
+      ORDER BY return_percentage ASC 
+      LIMIT 3
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching worst performers:', error);
+    res.status(500).json({ error: 'Failed to fetch worst performers' });
+  }
+});
+
+// Get portfolio summary
+router.get('/portfolio-summary', async (req, res) => {
+  try {
+    const [summary] = await pool.query(`
+      SELECT 
+        COUNT(*) as total_stocks,
+        SUM(quantity * buy_price) as total_investment,
+        SUM(quantity * COALESCE(current_price, buy_price)) as current_value,
+        SUM(COALESCE(return_value, 0)) as total_return
+      FROM holdings
+    `);
+    res.json(summary[0]);
+  } catch (error) {
+    console.error('Error fetching portfolio summary:', error);
+    res.status(500).json({ error: 'Failed to fetch portfolio summary' });
+  }
+});
+
+// Get alerts (stocks near threshold)
+router.get('/alerts', async (req, res) => {
+  try {
+    const [alerts] = await pool.query(`
+      SELECT symbol, company_name, current_price, threshold,
+             CASE 
+               WHEN current_price >= threshold THEN 'above_threshold'
+               WHEN current_price <= threshold * 0.95 THEN 'near_threshold'
+               ELSE 'normal'
+             END as alert_type
+      FROM holdings 
+      WHERE threshold IS NOT NULL 
+      AND current_price IS NOT NULL
+      AND (current_price >= threshold OR current_price <= threshold * 0.95)
+    `);
+    res.json(alerts);
+  } catch (error) {
+    console.error('Error fetching alerts:', error);
+    res.status(500).json({ error: 'Failed to fetch alerts' });
+  }
+});
 module.exports = router;

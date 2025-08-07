@@ -7,11 +7,22 @@ const cors = require('cors');
 const stockRoutes = require('./routes/stocks');
 const recordPortfolioValue = require('./services/record_history');
 
-
 const app = express();
+//app.use(cors());
+// CORS configuration - MUST BE BEFORE OTHER MIDDLEWARE
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5502', 'http://localhost:8080', 'file://'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+
+
 app.use(express.json());
 app.use('/holdings', holdingsRoute);
-app.use(cors());
+
+
 // Get all holdings
 app.get('/holdings', async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM holdings');
